@@ -1,7 +1,41 @@
 import '../styles/index.scss';
 
-// Weather API key
-const key = 'OEl5iVG56QLegnJt3YTqNgmfVrl1LBLI';
+class Forecast {
+    constructor() {
+        this.key = 'OEl5iVG56QLegnJt3YTqNgmfVrl1LBLI';
+        this.weatherURI = 'http://dataservice.accuweather.com/currentconditions/v1/';
+        this.cityURI = 'http://dataservice.accuweather.com/locations/v1/cities/search';
+    }
+
+   async updateCity(city) {
+        const cityDetails = await this.getCity(city);
+        const weather = await this.getWeather(cityDetails.Key);
+
+        return {cityDetails, weather};
+    }
+
+    async getCity(city) {
+        const query = `?apikey=${this.key}&q=${city}`;
+
+        const response = await fetch(this.cityURI + query);
+        const data = await response.json();
+
+        return data[0]; // first city from the list
+
+    }
+
+    async getWeather(id) {
+        const query = `${id}?apikey=${this.key}`;
+
+        const response = await fetch(this.weatherURI + query);
+        const data = await response.json();
+
+        return data[0];
+    }
+}
+
+const forecast = new Forecast();
+
 
 const cityForm = document.querySelector('form');
 const card = document.querySelector('.card');
@@ -42,68 +76,13 @@ const updateUi = (data) => {
 
 };
 
-
-//
-// Weather API
-//
-
-// Get City info
-const getCity = async (city) => {
-
-    const base = 'http://dataservice.accuweather.com/locations/v1/cities/search';
-    const query = `?apikey=${key}&q=${city}`;
-
-    const response = await fetch(base + query);
-    const data = await response.json();
-
-    return data[0]; // first city from the list
-
-};
-
-
-// Get Weather info
-const getWeather = async (id) => {
-
-    const base = 'http://dataservice.accuweather.com/currentconditions/v1/';
-    const query = `${id}?apikey=${key}`;
-
-    const response = await fetch(base + query);
-    const data = await response.json();
-
-    return data[0];
-
-};
-
-
-//
-// End Weather API
-//
-
-
-
-const updateCity = async (city) => {
-
-    const cityDetails = await getCity(city);
-    const weather = await getWeather(cityDetails.Key);
-
-    // return {
-    //     cityDetails: cityDetails,
-    //     weather: weather
-    // };
-
-    // Shorthand thanks to ES6
-    return {cityDetails, weather};
-
-};
-
-
 cityForm.addEventListener('submit', e => {
     e.preventDefault();
 
     const city = cityForm.city.value.trim();
     cityForm.reset();
 
-    updateCity(city)
+    forecast.updateCity(city)
         .then(data => updateUi(data))
         .catch(err => console.log(err));
 
@@ -114,7 +93,7 @@ cityForm.addEventListener('submit', e => {
 
 if(localStorage.getItem('city')) {
 
-    updateCity(localStorage.getItem('city'))
+    forecast.updateCity(localStorage.getItem('city'))
         .then(data => updateUi(data))
         .catch(err => console.log(err));
 
