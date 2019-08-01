@@ -28,11 +28,11 @@ module.exports = merge(common, {
           emitWarning: true,
         }
       },
-      {
-        test: /\.(js)$/,
-        include: Path.resolve(__dirname, '../src'),
-        loader: 'babel-loader'
-      },
+      // {
+      //   test: /\.(js)$/,
+      //   include: Path.resolve(__dirname, '../src'),
+      //   loader: 'babel-loader'
+      // },
       {
         test: /\.s?css$/i,
         use: ['style-loader', 'css-loader?sourceMap=true', 'sass-loader']
